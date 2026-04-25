@@ -37,7 +37,7 @@ export type PlanResponse = {
   };
 };
 
-const API_BASE_URL =
+const API_BASE_URL ="https://lab-protocol-generator-backend.onrender.com"
   (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ||
   "http://localhost:8000";
 
