@@ -4,9 +4,10 @@ import { HeroInput } from "@/components/labgen/HeroInput";
 import { StageSpinner } from "@/components/labgen/StageSpinner";
 import { QcPanel } from "@/components/labgen/QcPanel";
 import { PlanDashboard } from "@/components/labgen/PlanDashboard";
-import { fetchLabData, type QcResponse, type PlanResponse } from "@/lib/labApi";
+import { fetchLiteratureQc, fetchExperimentPlan, type QcResponse, type PlanResponse } from "@/lib/labApi";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 
 type View = "input" | "qc" | "plan";
 
@@ -27,17 +28,27 @@ const Index = () => {
     setView("qc");
     setLoadingQc(true);
 
-    const qcResult = await fetchLabData("qc");
-    if (runId !== runIdRef.current) return;
-    setQc(qcResult);
-    setLoadingQc(false);
-    setLoadingPlan(true);
+    try {
+      const qcResult = await fetchLiteratureQc(q);
+      if (runId !== runIdRef.current) return;
+      setQc(qcResult);
+      setLoadingQc(false);
+      setLoadingPlan(true);
 
-    const planResult = await fetchLabData("plan");
-    if (runId !== runIdRef.current) return;
-    setPlan(planResult);
-    setLoadingPlan(false);
-    setView("plan");
+      const planResult = await fetchExperimentPlan(q);
+      if (runId !== runIdRef.current) return;
+      setPlan(planResult);
+      setLoadingPlan(false);
+      setView("plan");
+    } catch (err) {
+      if (runId !== runIdRef.current) return;
+      console.error("LabGen request failed:", err);
+      setLoadingQc(false);
+      setLoadingPlan(false);
+      toast.error("Backend request failed", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
   };
 
   const reset = () => {
