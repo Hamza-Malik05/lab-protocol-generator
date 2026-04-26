@@ -28,6 +28,7 @@ import {
   Pencil,
   Eye,
   Loader2,
+  Trash2,
 } from "lucide-react";
 import {
   saveFeedback,
@@ -67,6 +68,20 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
         return { ...s, [key]: value };
       })
     );
+  };
+
+  const removeStep = (idx: number) => {
+    setSteps((prev) =>
+      prev
+        .filter((_, i) => i !== idx)
+        .map((s, i) => ({ ...s, step_number: i + 1 }))
+    );
+    toast.success("Step removed");
+  };
+
+  const removeMaterial = (idx: number) => {
+    setMaterials((prev) => prev.filter((_, i) => i !== idx));
+    toast.success("Material removed");
   };
 
   const updateMaterial = (idx: number, key: keyof Material, value: string) => {
@@ -274,6 +289,19 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
                       {s.description}
                     </p>
                   )}
+                  {reviewMode && (
+                    <div className="flex justify-end pt-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeStep(idx)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                        Remove step
+                      </Button>
+                    </div>
+                  )}
                 </AccordionContent>
               </AccordionItem>
             ))}
@@ -295,6 +323,7 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
                 <TableHead className="text-xs uppercase tracking-wider">Supplier</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Catalog #</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider text-right">Cost (USD)</TableHead>
+                {reviewMode && <TableHead className="w-[60px]" />}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -330,6 +359,19 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
                       align="right"
                     />
                   </TableCell>
+                  {reviewMode && (
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeMaterial(idx)}
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        aria-label="Remove material"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
               <TableRow className="border-border/60 bg-secondary/40 hover:bg-secondary/40">
@@ -337,6 +379,7 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
                   Total
                 </TableCell>
                 <TableCell className="text-right font-semibold text-primary">{fmtUsd(totalCost)}</TableCell>
+                {reviewMode && <TableCell />}
               </TableRow>
             </TableBody>
           </Table>
