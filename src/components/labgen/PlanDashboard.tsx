@@ -28,6 +28,7 @@ import {
   Pencil,
   Eye,
   Loader2,
+  Trash2,
 } from "lucide-react";
 import {
   saveFeedback,
@@ -67,6 +68,20 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
         return { ...s, [key]: value };
       })
     );
+  };
+
+  const removeStep = (idx: number) => {
+    setSteps((prev) =>
+      prev
+        .filter((_, i) => i !== idx)
+        .map((s, i) => ({ ...s, step_number: i + 1 }))
+    );
+    toast.success("Step removed");
+  };
+
+  const removeMaterial = (idx: number) => {
+    setMaterials((prev) => prev.filter((_, i) => i !== idx));
+    toast.success("Material removed");
   };
 
   const updateMaterial = (idx: number, key: keyof Material, value: string) => {
