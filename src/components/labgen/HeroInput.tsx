@@ -90,8 +90,8 @@ export const HeroInput = ({ onSubmit }: Props) => {
             </div>
             <Button
               size="lg"
-              disabled={!value.trim()}
-              onClick={() => onSubmit(value.trim(), domain.trim() || "General Science")}
+              disabled={!value.trim() || !domain}
+              onClick={() => onSubmit(value.trim(), domain)}
               className="bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 shadow-[0_0_24px_hsl(var(--primary)/0.35)] font-medium"
             >
               Run Literature QC & Generate
