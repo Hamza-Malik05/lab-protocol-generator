@@ -50,14 +50,24 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
   const [reviewMode, setReviewMode] = useState(false);
   const [steps, setSteps] = useState<ProtocolStep[]>(plan.data.protocol_steps);
   const [materials, setMaterials] = useState<Material[]>(plan.data.materials_list);
+  // Frontend-only quantity per material (defaults to 1). Folded into estimated_cost_usd on save.
+  const [quantities, setQuantities] = useState<number[]>(
+    () => plan.data.materials_list.map(() => 1)
+  );
   const [summary, setSummary] = useState(plan.data.executive_summary);
   const [validation, setValidation] = useState(plan.data.validation_approach);
   const [timelineWeeks, setTimelineWeeks] = useState<number>(plan.data.timeline_weeks);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const totalCost = materials.reduce((s, m) => s + (Number(m.estimated_cost_usd) || 0), 0);
+  const lineTotal = (idx: number) =>
+    (Number(materials[idx]?.estimated_cost_usd) || 0) * (Number(quantities[idx]) || 0);
+  const totalCost = materials.reduce(
+    (s, m, i) => s + (Number(m.estimated_cost_usd) || 0) * (Number(quantities[i]) || 0),
+    0
+  );
   const totalHours = steps.reduce((s, st) => s + (Number(st.duration_hours) || 0), 0);
+
 
   const updateStep = (idx: number, key: keyof ProtocolStep, value: string) => {
     setSteps((prev) =>
@@ -81,7 +91,13 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
 
   const removeMaterial = (idx: number) => {
     setMaterials((prev) => prev.filter((_, i) => i !== idx));
+    setQuantities((prev) => prev.filter((_, i) => i !== idx));
     toast.success("Material removed");
+  };
+
+  const updateQuantity = (idx: number, value: string) => {
+    const n = Math.max(0, parseFloat(value) || 0);
+    setQuantities((prev) => prev.map((q, i) => (i === idx ? n : q)));
   };
 
   const updateMaterial = (idx: number, key: keyof Material, value: string) => {
