@@ -50,14 +50,24 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
   const [reviewMode, setReviewMode] = useState(false);
   const [steps, setSteps] = useState<ProtocolStep[]>(plan.data.protocol_steps);
   const [materials, setMaterials] = useState<Material[]>(plan.data.materials_list);
+  // Frontend-only quantity per material (defaults to 1). Folded into estimated_cost_usd on save.
+  const [quantities, setQuantities] = useState<number[]>(
+    () => plan.data.materials_list.map(() => 1)
+  );
   const [summary, setSummary] = useState(plan.data.executive_summary);
   const [validation, setValidation] = useState(plan.data.validation_approach);
   const [timelineWeeks, setTimelineWeeks] = useState<number>(plan.data.timeline_weeks);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const totalCost = materials.reduce((s, m) => s + (Number(m.estimated_cost_usd) || 0), 0);
+  const lineTotal = (idx: number) =>
+    (Number(materials[idx]?.estimated_cost_usd) || 0) * (Number(quantities[idx]) || 0);
+  const totalCost = materials.reduce(
+    (s, m, i) => s + (Number(m.estimated_cost_usd) || 0) * (Number(quantities[i]) || 0),
+    0
+  );
   const totalHours = steps.reduce((s, st) => s + (Number(st.duration_hours) || 0), 0);
+
 
   const updateStep = (idx: number, key: keyof ProtocolStep, value: string) => {
     setSteps((prev) =>
@@ -81,7 +91,13 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
 
   const removeMaterial = (idx: number) => {
     setMaterials((prev) => prev.filter((_, i) => i !== idx));
+    setQuantities((prev) => prev.filter((_, i) => i !== idx));
     toast.success("Material removed");
+  };
+
+  const updateQuantity = (idx: number, value: string) => {
+    const n = Math.max(0, parseFloat(value) || 0);
+    setQuantities((prev) => prev.map((q, i) => (i === idx ? n : q)));
   };
 
   const updateMaterial = (idx: number, key: keyof Material, value: string) => {
@@ -103,7 +119,12 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
         corrected_plan: {
           executive_summary: summary,
           protocol_steps: steps,
-          materials_list: materials,
+          // Fold frontend-only quantity into estimated_cost_usd so backend contract is unchanged
+          materials_list: materials.map((m, i) => ({
+            ...m,
+            estimated_cost_usd:
+              (Number(m.estimated_cost_usd) || 0) * (Number(quantities[i]) || 0),
+          })),
           total_budget_usd: totalCost,
           timeline_weeks: timelineWeeks,
           validation_approach: validation,
@@ -322,7 +343,9 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
                 <TableHead className="text-xs uppercase tracking-wider">Item</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Supplier</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Catalog #</TableHead>
-                <TableHead className="text-xs uppercase tracking-wider text-right">Cost (USD)</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-right">Unit Cost</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-right w-[90px]">Qty</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-right">Line Total</TableHead>
                 {reviewMode && <TableHead className="w-[60px]" />}
               </TableRow>
             </TableHeader>
@@ -359,6 +382,18 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
                       align="right"
                     />
                   </TableCell>
+                  <TableCell className="text-right">
+                    <ReadOrEditCell
+                      editable={reviewMode}
+                      value={String(quantities[idx] ?? 1)}
+                      onChange={(v) => updateQuantity(idx, v)}
+                      type="number"
+                      align="right"
+                    />
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums font-medium">
+                    {fmtUsd(lineTotal(idx))}
+                  </TableCell>
                   {reviewMode && (
                     <TableCell className="text-right">
                       <Button
@@ -375,7 +410,7 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
                 </TableRow>
               ))}
               <TableRow className="border-border/60 bg-secondary/40 hover:bg-secondary/40">
-                <TableCell colSpan={3} className="font-medium uppercase text-xs tracking-wider text-muted-foreground">
+                <TableCell colSpan={5} className="font-medium uppercase text-xs tracking-wider text-muted-foreground">
                   Total
                 </TableCell>
                 <TableCell className="text-right font-semibold text-primary">{fmtUsd(totalCost)}</TableCell>
