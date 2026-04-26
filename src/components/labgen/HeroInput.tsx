@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 interface Props {
-  onSubmit: (question: string) => void;
+  onSubmit: (question: string, domain: string) => void;
 }
 
 const EXAMPLES = [
@@ -13,8 +14,11 @@ const EXAMPLES = [
   "Screen kinase inhibitors against a panel of resistant cancer cell lines.",
 ];
 
+const DOMAIN_SUGGESTIONS = ["Immunology", "Cell Biology", "Materials Science", "Oncology", "Neuroscience"];
+
 export const HeroInput = ({ onSubmit }: Props) => {
   const [value, setValue] = useState("");
+  const [domain, setDomain] = useState("General Science");
 
   return (
     <section className="container py-16 md:py-24 animate-fade-in-up">
@@ -40,27 +44,51 @@ export const HeroInput = ({ onSubmit }: Props) => {
           placeholder="Enter your scientific question (e.g., 'Can we improve solar cell efficiency by testing alternative materials?')"
           className="min-h-[160px] resize-none border-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/70"
         />
-        <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 p-3 border-t border-border/60">
-          <div className="flex flex-wrap gap-2">
-            {EXAMPLES.map((ex) => (
-              <button
-                key={ex}
-                onClick={() => setValue(ex)}
-                className="text-[11px] px-2.5 py-1 rounded-full border border-border/80 text-muted-foreground hover:text-foreground hover:border-primary/60 transition-colors"
-              >
-                {ex.length > 42 ? ex.slice(0, 42) + "…" : ex}
-              </button>
-            ))}
+        <div className="flex flex-col gap-3 p-3 border-t border-border/60">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <label className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground sm:w-20">
+              Domain
+            </label>
+            <Input
+              value={domain}
+              onChange={(e) => setDomain(e.target.value)}
+              placeholder="e.g., Immunology"
+              className="h-9 bg-background/40 border-border/70 text-sm flex-1"
+            />
+            <div className="flex flex-wrap gap-1.5">
+              {DOMAIN_SUGGESTIONS.map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDomain(d)}
+                  className="text-[11px] px-2 py-1 rounded-full border border-border/80 text-muted-foreground hover:text-foreground hover:border-primary/60 transition-colors"
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
           </div>
-          <Button
-            size="lg"
-            disabled={!value.trim()}
-            onClick={() => onSubmit(value.trim())}
-            className="bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 shadow-[0_0_24px_hsl(var(--primary)/0.35)] font-medium"
-          >
-            Run Literature QC & Generate
-            <ArrowRight className="ml-1.5 h-4 w-4" />
-          </Button>
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex flex-wrap gap-2">
+              {EXAMPLES.map((ex) => (
+                <button
+                  key={ex}
+                  onClick={() => setValue(ex)}
+                  className="text-[11px] px-2.5 py-1 rounded-full border border-border/80 text-muted-foreground hover:text-foreground hover:border-primary/60 transition-colors"
+                >
+                  {ex.length > 42 ? ex.slice(0, 42) + "…" : ex}
+                </button>
+              ))}
+            </div>
+            <Button
+              size="lg"
+              disabled={!value.trim()}
+              onClick={() => onSubmit(value.trim(), domain.trim() || "General Science")}
+              className="bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 shadow-[0_0_24px_hsl(var(--primary)/0.35)] font-medium"
+            >
+              Run Literature QC & Generate
+              <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </section>
