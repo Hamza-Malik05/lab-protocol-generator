@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 interface Props {
@@ -14,11 +13,18 @@ const EXAMPLES = [
   "Screen kinase inhibitors against a panel of resistant cancer cell lines.",
 ];
 
-const DOMAIN_SUGGESTIONS = ["Immunology", "Cell Biology", "Materials Science", "Oncology", "Neuroscience"];
+// 👇 Add or edit available domains here. These are the only options the user can pick.
+export const DOMAINS = [
+  "Immunology",
+  "Cell Biology",
+  "Materials Science",
+  "Oncology",
+  "Neuroscience",
+] as const;
 
 export const HeroInput = ({ onSubmit }: Props) => {
   const [value, setValue] = useState("");
-  const [domain, setDomain] = useState("General Science");
+  const [domain, setDomain] = useState<string>("");
 
   return (
     <section className="container py-16 md:py-24 animate-fade-in-up">
