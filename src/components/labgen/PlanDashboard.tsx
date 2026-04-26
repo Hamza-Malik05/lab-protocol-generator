@@ -119,7 +119,12 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
         corrected_plan: {
           executive_summary: summary,
           protocol_steps: steps,
-          materials_list: materials,
+          // Fold frontend-only quantity into estimated_cost_usd so backend contract is unchanged
+          materials_list: materials.map((m, i) => ({
+            ...m,
+            estimated_cost_usd:
+              (Number(m.estimated_cost_usd) || 0) * (Number(quantities[i]) || 0),
+          })),
           total_budget_usd: totalCost,
           timeline_weeks: timelineWeeks,
           validation_approach: validation,
