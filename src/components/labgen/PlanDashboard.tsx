@@ -29,6 +29,7 @@ import {
   Eye,
   Loader2,
   Trash2,
+  Plus,
 } from "lucide-react";
 import {
   saveFeedback,
@@ -93,6 +94,33 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
     setMaterials((prev) => prev.filter((_, i) => i !== idx));
     setQuantities((prev) => prev.filter((_, i) => i !== idx));
     toast.success("Material removed");
+  };
+
+  const addStep = () => {
+    setSteps((prev) => [
+      ...prev,
+      {
+        step_number: prev.length + 1,
+        title: "New step",
+        description: "",
+        duration_hours: 0,
+      },
+    ]);
+    toast.success("Step added");
+  };
+
+  const addMaterial = () => {
+    setMaterials((prev) => [
+      ...prev,
+      {
+        item_name: "New item",
+        supplier: "",
+        catalog_number: "",
+        estimated_cost_usd: 0,
+      },
+    ]);
+    setQuantities((prev) => [...prev, 1]);
+    toast.success("Material added");
   };
 
   const updateQuantity = (idx: number, value: string) => {
