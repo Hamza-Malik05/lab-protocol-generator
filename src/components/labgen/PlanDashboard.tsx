@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -60,6 +60,29 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
   const [timelineWeeks, setTimelineWeeks] = useState<number>(plan.data.timeline_weeks);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Snapshot of the initial plan to detect changes for enabling Save.
+  const initialSnapshot = useMemo(
+    () =>
+      JSON.stringify({
+        summary: plan.data.executive_summary,
+        validation: plan.data.validation_approach,
+        timelineWeeks: plan.data.timeline_weeks,
+        steps: plan.data.protocol_steps,
+        materials: plan.data.materials_list,
+        quantities: plan.data.materials_list.map(() => 1),
+      }),
+    [plan]
+  );
+  const currentSnapshot = JSON.stringify({
+    summary,
+    validation,
+    timelineWeeks,
+    steps,
+    materials,
+    quantities,
+  });
+  const isDirty = currentSnapshot !== initialSnapshot;
 
   const lineTotal = (idx: number) =>
     (Number(materials[idx]?.estimated_cost_usd) || 0) * (Number(quantities[idx]) || 0);
@@ -482,14 +505,22 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
             <Pencil className="h-3.5 w-3.5" /> Scientist's Notes
           </div>
           <p className="text-xs text-muted-foreground mb-3">
-            Why did you make these changes? This guidance trains the lab memory loop.
+            Why did you make these changes? This guidance trains the lab memory loop.{" "}
+            <span className="text-destructive">*</span> Required.
           </p>
           <Textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="e.g., Local incubators require 15% concentration for optimal post-thaw viability."
+            required
+            aria-required="true"
             className="min-h-[110px] bg-background/40 border-border/70 text-sm leading-relaxed"
           />
+          {!notes.trim() && (
+            <p className="text-xs text-destructive mt-2">
+              Researcher notes are required before saving.
+            </p>
+          )}
         </section>
       )}
 
@@ -497,7 +528,11 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
       <div className="flex justify-end pt-2">
         <Button
           size="lg"
-          disabled={saving || (reviewMode && !notes.trim())}
+          disabled={
+            saving ||
+            !isDirty ||
+            (reviewMode && !notes.trim())
+          }
           onClick={handleSave}
           className="bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 shadow-[0_0_24px_hsl(var(--primary)/0.35)] font-medium"
         >
