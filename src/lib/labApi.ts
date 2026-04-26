@@ -25,26 +25,50 @@ export type Material = {
   estimated_cost_usd: number;
 };
 
+export type PlanData = {
+  executive_summary: string;
+  protocol_steps: ProtocolStep[];
+  materials_list: Material[];
+  total_budget_usd: number;
+  timeline_weeks: number;
+  validation_approach: string;
+};
+
 export type PlanResponse = {
   status: "success";
-  data: {
-    executive_summary: string;
-    protocol_steps: ProtocolStep[];
-    materials_list: Material[];
-    total_budget_usd: number;
-    timeline_weeks: number;
-    validation_approach: string;
-  };
+  data: PlanData;
 };
-//nth
-const API_BASE_URL=
+
+export type SaveFeedbackPayload = {
+  original_hypothesis: string;
+  domain: string;
+  corrected_plan: PlanData;
+  scientist_notes: string;
+};
+
+export type SaveFeedbackResponse = {
+  status: "success" | "error";
+  message: string;
+};
+
+export type HealthResponse = {
+  status: string;
+  service: string;
+};
+
+const API_BASE_URL =
   (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ||
   "http://localhost:8000";
+
+const JSON_HEADERS = {
+  "Content-Type": "application/json",
+  Accept: "application/json",
+};
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    headers: JSON_HEADERS,
     body: JSON.stringify(body),
   });
   if (!res.ok) {
@@ -54,22 +78,20 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return (await res.json()) as T;
 }
 
-export function fetchLiteratureQc(hypothesis: string): Promise<QcResponse> {
-  return postJson<QcResponse>("/api/literature-qc", { hypothesis });
+export function fetchLiteratureQc(hypothesis: string, domain: string): Promise<QcResponse> {
+  return postJson<QcResponse>("/api/literature-qc", { hypothesis, domain });
 }
 
-export function fetchExperimentPlan(hypothesis: string): Promise<PlanResponse> {
-  return postJson<PlanResponse>("/api/generate-plan", { hypothesis });
+export function fetchExperimentPlan(hypothesis: string, domain: string): Promise<PlanResponse> {
+  return postJson<PlanResponse>("/api/generate-plan", { hypothesis, domain });
 }
 
-// Backwards-compatible helper. Pass the hypothesis as the second arg.
-export async function fetchLabData(endpoint: "qc", hypothesis: string): Promise<QcResponse>;
-export async function fetchLabData(endpoint: "plan", hypothesis: string): Promise<PlanResponse>;
-export async function fetchLabData(
-  endpoint: "qc" | "plan",
-  hypothesis: string
-): Promise<QcResponse | PlanResponse> {
-  return endpoint === "qc"
-    ? fetchLiteratureQc(hypothesis)
-    : fetchExperimentPlan(hypothesis);
+export function saveFeedback(payload: SaveFeedbackPayload): Promise<SaveFeedbackResponse> {
+  return postJson<SaveFeedbackResponse>("/api/save-feedback", payload);
+}
+
+export async function pingBackend(): Promise<HealthResponse> {
+  const res = await fetch(`${API_BASE_URL}/`, { headers: JSON_HEADERS });
+  if (!res.ok) throw new Error(`Healthcheck failed (${res.status})`);
+  return (await res.json()) as HealthResponse;
 }

@@ -4,7 +4,13 @@ import { HeroInput } from "@/components/labgen/HeroInput";
 import { StageSpinner } from "@/components/labgen/StageSpinner";
 import { QcPanel } from "@/components/labgen/QcPanel";
 import { PlanDashboard } from "@/components/labgen/PlanDashboard";
-import { fetchLiteratureQc, fetchExperimentPlan, type QcResponse, type PlanResponse } from "@/lib/labApi";
+import {
+  fetchLiteratureQc,
+  fetchExperimentPlan,
+  pingBackend,
+  type QcResponse,
+  type PlanResponse,
+} from "@/lib/labApi";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
 import { toast } from "sonner";
@@ -14,28 +20,30 @@ type View = "input" | "qc" | "plan";
 const Index = () => {
   const [view, setView] = useState<View>("input");
   const [question, setQuestion] = useState("");
+  const [domain, setDomain] = useState("General Science");
   const [qc, setQc] = useState<QcResponse | null>(null);
   const [plan, setPlan] = useState<PlanResponse | null>(null);
   const [loadingQc, setLoadingQc] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState(false);
   const runIdRef = useRef(0);
 
-  const handleSubmit = async (q: string) => {
+  const handleSubmit = async (q: string, d: string) => {
     const runId = ++runIdRef.current;
     setQuestion(q);
+    setDomain(d);
     setQc(null);
     setPlan(null);
     setView("qc");
     setLoadingQc(true);
 
     try {
-      const qcResult = await fetchLiteratureQc(q);
+      const qcResult = await fetchLiteratureQc(q, d);
       if (runId !== runIdRef.current) return;
       setQc(qcResult);
       setLoadingQc(false);
       setLoadingPlan(true);
 
-      const planResult = await fetchExperimentPlan(q);
+      const planResult = await fetchExperimentPlan(q, d);
       if (runId !== runIdRef.current) return;
       setPlan(planResult);
       setLoadingPlan(false);
@@ -63,6 +71,13 @@ const Index = () => {
 
   useEffect(() => {
     document.title = "Fulcrum LabGen — From Hypothesis to Runnable Experiment";
+  }, []);
+
+  // Pre-warm the backend Render instance ("caffeine drip")
+  useEffect(() => {
+    pingBackend()
+      .then((data) => console.log("Backend warmed up:", data))
+      .catch((err) => console.warn("Waking up backend…", err));
   }, []);
 
   return (
@@ -97,7 +112,9 @@ const Index = () => {
             {loadingPlan && (
               <StageSpinner label="Generating full operational plan based on findings…" />
             )}
-            {plan && view === "plan" && <PlanDashboard plan={plan} />}
+            {plan && view === "plan" && (
+              <PlanDashboard plan={plan} hypothesis={question} domain={domain} />
+            )}
           </div>
         )}
       </main>
