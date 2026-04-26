@@ -15,11 +15,16 @@ const EXAMPLES = [
 
 // 👇 Add or edit available domains here. These are the only options the user can pick.
 export const DOMAINS = [
+  "General Science",
   "Immunology",
   "Cell Biology",
-  "Materials Science",
-  "Oncology",
-  "Neuroscience",
+  "Molecular Biology & Genetics",
+  "Microbiology & Virology",
+  "Biochemistry",
+  "Chemistry & Nanotech",
+  "Pharmacology & Drug Discovery",
+  "Diagnostics & Clinical Assays",
+  "Bioinformatics & Computational Bio",
 ] as const;
 
 export const HeroInput = ({ onSubmit }: Props) => {
