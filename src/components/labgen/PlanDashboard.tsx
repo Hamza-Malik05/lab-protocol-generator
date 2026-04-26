@@ -29,6 +29,7 @@ import {
   Eye,
   Loader2,
   Trash2,
+  Plus,
 } from "lucide-react";
 import {
   saveFeedback,
@@ -93,6 +94,33 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
     setMaterials((prev) => prev.filter((_, i) => i !== idx));
     setQuantities((prev) => prev.filter((_, i) => i !== idx));
     toast.success("Material removed");
+  };
+
+  const addStep = () => {
+    setSteps((prev) => [
+      ...prev,
+      {
+        step_number: prev.length + 1,
+        title: "New step",
+        description: "",
+        duration_hours: 0,
+      },
+    ]);
+    toast.success("Step added");
+  };
+
+  const addMaterial = () => {
+    setMaterials((prev) => [
+      ...prev,
+      {
+        item_name: "New item",
+        supplier: "",
+        catalog_number: "",
+        estimated_cost_usd: 0,
+      },
+    ]);
+    setQuantities((prev) => [...prev, 1]);
+    toast.success("Material added");
   };
 
   const updateQuantity = (idx: number, value: string) => {
@@ -327,6 +355,19 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
               </AccordionItem>
             ))}
           </Accordion>
+          {reviewMode && (
+            <div className="p-3 border-t border-border/50">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addStep}
+                className="w-full border-dashed border-border/70 hover:border-primary/60 hover:text-primary"
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                Add step
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -418,6 +459,19 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
               </TableRow>
             </TableBody>
           </Table>
+          {reviewMode && (
+            <div className="p-3 border-t border-border/50">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addMaterial}
+                className="w-full border-dashed border-border/70 hover:border-primary/60 hover:text-primary"
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                Add material
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 
