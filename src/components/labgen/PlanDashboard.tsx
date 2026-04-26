@@ -289,6 +289,19 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
                       {s.description}
                     </p>
                   )}
+                  {reviewMode && (
+                    <div className="flex justify-end pt-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeStep(idx)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                        Remove step
+                      </Button>
+                    </div>
+                  )}
                 </AccordionContent>
               </AccordionItem>
             ))}
@@ -310,6 +323,7 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
                 <TableHead className="text-xs uppercase tracking-wider">Supplier</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Catalog #</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider text-right">Cost (USD)</TableHead>
+                {reviewMode && <TableHead className="w-[60px]" />}
               </TableRow>
             </TableHeader>
             <TableBody>
