@@ -355,6 +355,19 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
               </AccordionItem>
             ))}
           </Accordion>
+          {reviewMode && (
+            <div className="p-3 border-t border-border/50">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addStep}
+                className="w-full border-dashed border-border/70 hover:border-primary/60 hover:text-primary"
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                Add step
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -446,6 +459,19 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
               </TableRow>
             </TableBody>
           </Table>
+          {reviewMode && (
+            <div className="p-3 border-t border-border/50">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addMaterial}
+                className="w-full border-dashed border-border/70 hover:border-primary/60 hover:text-primary"
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                Add material
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 
