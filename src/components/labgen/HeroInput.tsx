@@ -51,26 +51,29 @@ export const HeroInput = ({ onSubmit }: Props) => {
           className="min-h-[160px] resize-none border-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/70"
         />
         <div className="flex flex-col gap-3 p-3 border-t border-border/60">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <label className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground sm:w-20">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+            <label className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground sm:w-20 sm:pt-1.5">
               Domain
             </label>
-            <Input
-              value={domain}
-              onChange={(e) => setDomain(e.target.value)}
-              placeholder="e.g., Immunology"
-              className="h-9 bg-background/40 border-border/70 text-sm flex-1"
-            />
-            <div className="flex flex-wrap gap-1.5">
-              {DOMAIN_SUGGESTIONS.map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setDomain(d)}
-                  className="text-[11px] px-2 py-1 rounded-full border border-border/80 text-muted-foreground hover:text-foreground hover:border-primary/60 transition-colors"
-                >
-                  {d}
-                </button>
-              ))}
+            <div className="flex-1 flex flex-wrap gap-1.5">
+              {DOMAINS.map((d) => {
+                const selected = domain === d;
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setDomain(d)}
+                    className={
+                      "text-[11px] px-2.5 py-1 rounded-full border transition-colors " +
+                      (selected
+                        ? "border-primary bg-primary/15 text-foreground"
+                        : "border-border/80 text-muted-foreground hover:text-foreground hover:border-primary/60")
+                    }
+                  >
+                    {d}
+                  </button>
+                );
+              })}
             </div>
           </div>
           <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
