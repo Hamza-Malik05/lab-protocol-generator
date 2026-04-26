@@ -343,7 +343,9 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
                 <TableHead className="text-xs uppercase tracking-wider">Item</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Supplier</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Catalog #</TableHead>
-                <TableHead className="text-xs uppercase tracking-wider text-right">Cost (USD)</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-right">Unit Cost</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-right w-[90px]">Qty</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-right">Line Total</TableHead>
                 {reviewMode && <TableHead className="w-[60px]" />}
               </TableRow>
             </TableHeader>
@@ -380,6 +382,18 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
                       align="right"
                     />
                   </TableCell>
+                  <TableCell className="text-right">
+                    <ReadOrEditCell
+                      editable={reviewMode}
+                      value={String(quantities[idx] ?? 1)}
+                      onChange={(v) => updateQuantity(idx, v)}
+                      type="number"
+                      align="right"
+                    />
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums font-medium">
+                    {fmtUsd(lineTotal(idx))}
+                  </TableCell>
                   {reviewMode && (
                     <TableCell className="text-right">
                       <Button
@@ -396,7 +410,7 @@ export const PlanDashboard = ({ plan, hypothesis, domain }: Props) => {
                 </TableRow>
               ))}
               <TableRow className="border-border/60 bg-secondary/40 hover:bg-secondary/40">
-                <TableCell colSpan={3} className="font-medium uppercase text-xs tracking-wider text-muted-foreground">
+                <TableCell colSpan={5} className="font-medium uppercase text-xs tracking-wider text-muted-foreground">
                   Total
                 </TableCell>
                 <TableCell className="text-right font-semibold text-primary">{fmtUsd(totalCost)}</TableCell>
